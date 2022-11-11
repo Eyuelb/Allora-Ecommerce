@@ -21,111 +21,129 @@ exports.moderatorBoard = (req, res) => {
   res.status(200).send("Moderator Content.");
 };
 
-exports.getall = (req, res) => {
 
-  try {
-
-    // get the page and limit out of the api request
-
-    const page = req.body.page ? parseInt (req.body.page): 1;
-    const limit = req.body.limit ? parseInt (req.body.limit): 5;
-
-    if ((page < 0) || (limit < 0)) {
-        throw new Error ('page and limit can not have a negative values');
-    }
-
-    // get the startIndex values and get endIndex values 
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-
-    // making an empty object that holds the value of the current, prev and next pages
-
-    const rep = {};
-
-    // If the startIndex is greater than 0 then in that case
-    // push previous page value and limit of data for each page
-
-    if (startIndex > 0) {
-        rep.previous = {
-            details: {
-                page: page - 1,
-                limit
-            }
-        }
-    }
-
-    // push the current value in the rep object
-
-    rep.current = {
-        details: {
-            page,
-            limit
-        }
-    }
+const getPagination = (page, size) => {
+    const limit = size ? +size : 3;
+    const offset = page ? page * limit : 0;
+  
+    return { limit, offset };
+  };
+  
+  const getPagingData = (data, page, limit) => {
+    const { count: totalItems, rows: users } = data;
+    const currentPage = page ? +page : 0;
+    const totalPages = Math.ceil(totalItems / limit);
+  
+    return { totalItems, users, totalPages, currentPage };
+  };
 
 
-    // count the number of documents in the Articles collection of the database
-    User.countUser ({
-        author: req.founduser._id
-    }).then ((countDocs) => {
+exports.findAllUsers = (req, res) => {
+    const { page, size } = req.query;
+    const { limit, offset } = getPagination(page, size);
+  
+    User.findAndCountAll({ limit, offset })
+      .then(data => {
+        const response = getPagingData(data, page, limit);
+        res.send(response);
+      })
+      .catch(err => {
+        res.status(500).send({
+          message:
+            err.message || "Some error occurred while retrieving users."
+        });
+      });
 
-        // if endindex < counted Objects then make the next property in rep Object
-        if (endIndex < countDocs) {
-            rep.next = {
-                details: {
-                    page: page + 1,
-                    limit
-                }
-            }
-        }
-
-        // return a promise to find the Articles having author the 'logged in' user
-
-        return Article.find ({
-            author: req.founduser._id
-        })
-        .limit (limit) // applying limit to the results found
-        .skip (startIndex) // skipping a certain number of docs from start equal to startIndex
-    })
-    .then ((foundDocs) => {
-
-        // return Docs to the user
-        return res.status (200).send ({
-            status: 'success',
-            foundDocs,
-            rep
-        })
-    })
-    .catch ((error) => {
-
-        // return any error to the user
-        return res.status (401).send ({
-            status: 'failure',
-            message: error.message
-        })
-    })
-
-}
-catch (error) {
-    return res.status (401).send ({
-        status: 'failure',
-        message: error.message
-    })
-}
 };
 
-exports.getone = (req, res) => {
-  res.status(200).send("Admin Content.");
+exports.findOneUser = (req, res) => {
+  const id = req.query.id
+
+  User.findByPk(id)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error retrieving User with id=" + id
+      });
+    });
 };
 
-exports.update = (req, res) => {
-  res.status(200).send("Public Content.");
-};
+exports.updateOneUser = (req, res) => {
+    const id = req.query.id;
 
-exports.delete = (req, res) => {
-  res.status(200).send("User Content.");
+  User.update(req.body, {
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "User was updated successfully."
+        });
+      } else {
+        res.send({
+          message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error updating User with id=" + id
+      });
+    });
 };
 
 
+exports.deleteOneUser = (req, res) => {
+    const id = req.query.id;
+
+  Tutorial.destroy({
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "user was deleted successfully!"
+        });
+      } else {
+        res.send({
+          message: `Cannot delete user with id=${id}. Maybe user was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete user with id=" + id
+      });
+    });
+};
+
+
+exports.search = (req, res) => {
+    const { page, size, username, phonenumber, email , id , gender , createdAt , updatedAt ,verification_code_status,reset_verification_code_status } = req.query;
+    let condition = {
+        username: username ? { username: { [Op.like]: `%${username}%` } } : null,
+        phonenumber: phonenumber ? { phonenumber: { [Op.like]: `%${phonenumber}%` } } : null,
+        email: email ? { email: { [Op.like]: `%${email}%` } } : null,
+    };
+   // var title = title ? { title: { [Op.like]: `%${title}%` } } : null;
+  
+    const { limit, offset } = getPagination(page, size);
+  
+    User.findAndCountAll(
+        { where: 
+            username ? { username: { [Op.like]: `%${username}%` } } : null
+            , limit, offset })
+      .then(data => {
+        const response = getPagingData(data, page, limit);
+        res.send(response);
+      })
+      .catch(err => {
+        res.status(500).send({
+          message:
+            err.message || "Some error occurred while retrieving tutorials."
+        });
+      });
+  };
 
