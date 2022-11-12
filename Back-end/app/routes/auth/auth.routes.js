@@ -1,9 +1,10 @@
-const { signUp , signIn, verification , forget , reset , authJwt} = require("../middleware");
-const requestlimiter = require("../ratelimiters/ratelimiter");
-const auth_controller = require("../controllers/auth.controller");
-const verify_controller = require("../controllers/verify.controller");
-const forget_controller = require("../controllers/forget.controller");
-const reset_controller = require("../controllers/reset.controller");
+const { signUp , signIn, verification , forget , reset , authJwt} = require("../../middleware");
+const { auth_controller,verify_controller,forget_controller,reset_controller} = require("../../controllers");
+const requestlimiter = require("../../ratelimiters/ratelimiter");
+//const auth_controller = require("../controllers/auth.controller");
+//const verify_controller = require("../auth/controllers/verify.controller");
+//const forget_controller = require("../auth/controllers/forget.controller");
+//const reset_controller = require("../auth/controllers/reset.controller");
 module.exports = function(app) {
   app.use(function(req, res, next) {
     res.header(

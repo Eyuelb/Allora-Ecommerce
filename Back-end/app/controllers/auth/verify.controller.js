@@ -1,5 +1,5 @@
-const db = require("../models");
-const config = require("../config/auth.config");
+const db = require("../../models");
+const config = require("../../config/auth.config");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
 
 const Op = db.Sequelize.Op;
@@ -10,7 +10,7 @@ var bcrypt = require("bcryptjs");
 exports.verficationCodeStatus = (req, res,next) => {
   // update verfication code statuse
 
-      if (!req.body.phonenumber) {
+      if (!req.body.phonenumber) { 
         return res.status(404).send({ message: "phone number missing." });
       }
       User.update({

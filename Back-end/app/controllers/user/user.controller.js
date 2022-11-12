@@ -1,6 +1,6 @@
-const db = require("../models");
-const config = require("../config/auth.config");
-const { verification } = require("../middleware");
+const db = require("../../models");
+const config = require("../../config/auth.config");
+const { verification } = require("../../middleware");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
 
 const Op = db.Sequelize.Op;
@@ -33,8 +33,9 @@ const getPagination = (page, size) => {
     const { count: totalItems, rows: users } = data;
     const currentPage = page ? +page : 0;
     const totalPages = Math.ceil(totalItems / limit);
+
   
-    return { totalItems, users, totalPages, currentPage };
+    return { totalItems, totalPages, currentPage , users};
   };
 
 
@@ -98,7 +99,7 @@ exports.updateOneUser = (req, res) => {
 exports.deleteOneUser = (req, res) => {
     const id = req.query.id;
 
-  Tutorial.destroy({
+  User.destroy({
     where: { id: id }
   })
     .then(num => {
@@ -121,20 +122,19 @@ exports.deleteOneUser = (req, res) => {
 
 
 exports.search = (req, res) => {
-    const { page, size, username, phonenumber, email , id , gender , createdAt , updatedAt ,verification_code_status,reset_verification_code_status } = req.query;
-    let condition = {
-        username: username ? { username: { [Op.like]: `%${username}%` } } : null,
-        phonenumber: phonenumber ? { phonenumber: { [Op.like]: `%${phonenumber}%` } } : null,
-        email: email ? { email: { [Op.like]: `%${email}%` } } : null,
-    };
-   // var title = title ? { title: { [Op.like]: `%${title}%` } } : null;
-  
+    const { page, size } = req.query;
     const { limit, offset } = getPagination(page, size);
-  
-    User.findAndCountAll(
-        { where: 
-            username ? { username: { [Op.like]: `%${username}%` } } : null
-            , limit, offset })
+    var condition = req.body
+var obj = {}
+for(const key in condition) {
+
+  obj[`${key}`] = { [Op.like]: `%${condition[key]}%` };
+    //console.log(`${key}: ${condition[key]}`);
+}
+
+
+    User.findAndCountAll({ 
+      where: obj , limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
         res.send(response);

@@ -1,10 +1,10 @@
-const authJwt = require("./authJwt");
-const signUp = require("./signUp");
-const verification = require("./verification");
-const access = require("./access");
-const forget = require("./forget");
-const signIn = require("./signIn");
-const reset = require("./reset");
+const authJwt = require("./auth/authJwt");
+const signUp = require("./auth/signUp");
+const verification = require("./auth/verification");
+const access = require("./auth/access");
+const forget = require("./auth/forget");
+const signIn = require("./auth/signIn");
+const reset = require("./auth/reset");
 module.exports = {
   authJwt,
   signUp,

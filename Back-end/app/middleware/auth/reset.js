@@ -1,4 +1,4 @@
-const db = require("../models");
+const db = require("../../models");
 const User = db.user;
 
 checkResetpassword = (req, res, next) => {

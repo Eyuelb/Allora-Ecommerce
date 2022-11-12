@@ -1,5 +1,5 @@
-const db = require("../models");
-const { verification } = require("../middleware");
+const db = require("../../models");
+const { verification } = require("../../middleware");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
 
 const Op = db.Sequelize.Op;
