@@ -21,10 +21,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // database
 const db = require("./app/models/");
 const Role = db.role;
+const OrderStatus = db.orderStatus;
+const CardType = db.cardType;
 
 // db.sequelize.sync();
 // force: true will drop the table if it already exists
-// db.sequelize.sync().then(() => {
+// db.sequelize.sync({force:false}).then(() => {
 //   console.log('Drop and Resync Database with { force: true }');
 //   initial();
 // });
@@ -37,9 +39,19 @@ app.get("/", (req, res) => {
 // routes
 require('./app/routes/auth/auth.routes')(app);
 require('./app/routes/user/user.routes')(app);
+require('./app/routes/user/address.routes')(app);
 
 require('./app/routes/product/product.routes')(app);
+require('./app/routes/product/brand.routes')(app);
+require('./app/routes/product/category.routes')(app);
+require('./app/routes/product/manufacturingCountry.routes')(app);
 
+
+require('./app/routes/order/order.routes')(app);
+require('./app/routes/payment/payment.routes')(app);
+
+require('./app/routes/cart/cart.routes')(app);
+require('./app/routes/cart/cartItems.routes')(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
@@ -60,5 +72,39 @@ function initial() {
   Role.create({
     id: 3,
     name: "admin"
+  });
+
+
+
+
+  CardType.create({
+    id: 1,
+    name: "credit"
+  });
+ 
+  CardType.create({
+    id: 2,
+    name: "debit"
+  });
+
+
+
+  OrderStatus.create({
+    id: 1,
+    name: "pending"
+  });
+ 
+  OrderStatus.create({
+    id: 2,
+    name: "shipped"
+  });
+ 
+  OrderStatus.create({
+    id: 3,
+    name: "delivered"
+  });
+  OrderStatus.create({
+    id: 4,
+    name: "canceled"
   });
 }

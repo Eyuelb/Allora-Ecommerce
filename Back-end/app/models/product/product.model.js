@@ -29,19 +29,23 @@ module.exports = (sequelize, Sequelize) => {
       //allowNull: false
     },
     productPrice: {
-      type: Sequelize.DOUBLE,
+      type: Sequelize.INTEGER,
       //allowNull: false
     },
     productPreviousPrice: {
-      type: Sequelize.DOUBLE,
+      type: Sequelize.INTEGER,
+      //allowNull: false
+    },
+    productQuantity: {
+      type: Sequelize.INTEGER,
       //allowNull: false
     },
     productMinimumQuantityAllowed: {
-      type: Sequelize.DOUBLE,
+      type: Sequelize.INTEGER,
       //allowNull: false
     },
     productMaximumQuantityAllowed: {
-      type: Sequelize.DOUBLE,
+      type: Sequelize.INTEGER,
       //allowNull: false
     },
     productMainImage: {

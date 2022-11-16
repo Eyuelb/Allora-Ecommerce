@@ -1,26 +1,7 @@
 const db = require("../../models");
-const config = require("../../config/auth.config");
-const { verification } = require("../../middleware");
-const { user: User} = db;
+const { brand:Brand} = db;
 
 const Op = db.Sequelize.Op;
-
-exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
-};
-
-exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
-};
-
-exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
-};
-
-exports.moderatorBoard = (req, res) => {
-  res.status(200).send("Moderator Content.");
-};
-
 
 const getPagination = (page, size) => {
     const limit = size ? +size : 3;
@@ -30,20 +11,20 @@ const getPagination = (page, size) => {
   };
   
   const getPagingData = (data, page, limit) => {
-    const { count: totalItems, rows: users } = data;
+    const { count: totalItems, rows: brands } = data;
     const currentPage = page ? +page : 0;
     const totalPages = Math.ceil(totalItems / limit);
 
   
-    return { totalItems, totalPages, currentPage , users};
+    return { totalItems, totalPages, currentPage , brands};
   };
 
 
-exports.findAllUsers = (req, res) => {
+exports.findAllBrands = (req, res) => {
     const { page, size } = req.query;
     const { limit, offset } = getPagination(page, size);
   
-    User.findAndCountAll({ limit, offset })
+    Brand.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
         res.send(response);
@@ -51,71 +32,88 @@ exports.findAllUsers = (req, res) => {
       .catch(err => {
         res.status(500).send({
           message:
-            err.message || "Some error occurred while retrieving users."
+            err.message || "Some error occurred while retrieving Brands."
         });
       });
 
 };
 
-exports.findOneUser = (req, res) => {
+exports.findOneBrand = (req, res) => {
   const id = req.query.id
 
-  User.findByPk(id)
+  Brand.findByPk(id)
     .then(data => {
       res.send(data);
     })
     .catch(err => {
       res.status(500).send({
-        message: "Error retrieving User with id=" + id
-      });
-    });
-};
-
-exports.updateOneUser = (req, res) => {
-    const id = req.query.id;
-
-  User.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "User was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating User with id=" + id
+        message: "Error retrieving Brand with id=" + id
       });
     });
 };
 
 
-exports.deleteOneUser = (req, res) => {
+exports.add = (req, res) => {
+    Brand.create(req.body).then(brand => {
+         
+        if(!brand){
+            res.status(400).send({ message: "Error while saving brands" });
+        }
+
+        if(brand){
+            res.status(200).send({ message: brand });
+        }
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        });
+    
+};
+
+exports.updateOneBrand = (req, res) => {
     const id = req.query.id;
 
-  User.destroy({
+Brand.update(req.body, {
     where: { id: id }
   })
     .then(num => {
       if (num == 1) {
         res.send({
-          message: "user was deleted successfully!"
+          message: "Brand was updated successfully."
         });
       } else {
         res.send({
-          message: `Cannot delete user with id=${id}. Maybe user was not found!`
+          message: `Cannot update Brand with id=${id}. Maybe Brand was not found or req.body is empty!`
         });
       }
     })
     .catch(err => {
       res.status(500).send({
-        message: "Could not delete user with id=" + id
+        message: "Error updating Brand with id=" + id
+      });
+    });
+};
+
+
+exports.deleteOneBrand = (req, res) => {
+    const id = req.query.id;
+
+Brand.destroy({
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Brand was deleted successfully!"
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Brand with id=${id}. Maybe Brand was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete Brand with id=" + id
       });
     });
 };
@@ -133,7 +131,7 @@ for(const key in condition) {
 }
 
 
-    User.findAndCountAll({ 
+Brand.findAndCountAll({ 
       where: obj , limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);

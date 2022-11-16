@@ -16,6 +16,16 @@ passwordSchema
 const jwt = require ('jsonwebtoken');
 
 
+
+const validateId = (id) => {
+    return ((!validator.isEmpty (id)) && validator.isInt(id));
+
+}
+
+const validateUserId = (id) => {
+    return ((!validator.isEmpty (id)) && validator.isInt(id));
+}
+
 // email validation function
 const validateEmail = (email) => {
     return validator.isEmail (email);
@@ -23,6 +33,7 @@ const validateEmail = (email) => {
 
 // username validation function
 const validateUsername = (username) => {
+
     return ((!validator.isEmpty (username)) && (validator.isAlphanumeric (username)));
 }
 
@@ -51,6 +62,8 @@ const validateDescription = (description) => {
 
 // exporting all the functions
 module.exports = {
+    validateId,
+    validateUserId,
     validateEmail,
     validateUsername,
     validatePassword,

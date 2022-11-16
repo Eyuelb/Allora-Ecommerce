@@ -1,26 +1,7 @@
 const db = require("../../models");
-const config = require("../../config/auth.config");
-const { verification } = require("../../middleware");
-const { user: User} = db;
+const { category:Category} = db;
 
 const Op = db.Sequelize.Op;
-
-exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
-};
-
-exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
-};
-
-exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
-};
-
-exports.moderatorBoard = (req, res) => {
-  res.status(200).send("Moderator Content.");
-};
-
 
 const getPagination = (page, size) => {
     const limit = size ? +size : 3;
@@ -30,20 +11,20 @@ const getPagination = (page, size) => {
   };
   
   const getPagingData = (data, page, limit) => {
-    const { count: totalItems, rows: users } = data;
+    const { count: totalItems, rows: categorys } = data;
     const currentPage = page ? +page : 0;
     const totalPages = Math.ceil(totalItems / limit);
 
   
-    return { totalItems, totalPages, currentPage , users};
+    return { totalItems, totalPages, currentPage , categorys};
   };
 
 
-exports.findAllUsers = (req, res) => {
+exports.findAllCategorys = (req, res) => {
     const { page, size } = req.query;
     const { limit, offset } = getPagination(page, size);
   
-    User.findAndCountAll({ limit, offset })
+    Category.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
         res.send(response);
@@ -51,71 +32,88 @@ exports.findAllUsers = (req, res) => {
       .catch(err => {
         res.status(500).send({
           message:
-            err.message || "Some error occurred while retrieving users."
+            err.message || "Some error occurred while retrieving Categorys."
         });
       });
 
 };
 
-exports.findOneUser = (req, res) => {
+exports.findOneCategory = (req, res) => {
   const id = req.query.id
 
-  User.findByPk(id)
+  Category.findByPk(id)
     .then(data => {
       res.send(data);
     })
     .catch(err => {
       res.status(500).send({
-        message: "Error retrieving User with id=" + id
-      });
-    });
-};
-
-exports.updateOneUser = (req, res) => {
-    const id = req.query.id;
-
-  User.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "User was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating User with id=" + id
+        message: "Error retrieving Category with id=" + id
       });
     });
 };
 
 
-exports.deleteOneUser = (req, res) => {
+exports.add = (req, res) => {
+    Category.create(req.body).then(category => {
+         
+        if(!category){
+            res.status(400).send({ message: "Error while saving categorys" });
+        }
+
+        if(category){
+            res.status(200).send({ message: category });
+        }
+        }).catch(err => {
+          res.status(500).send({ message: err.message });
+        });
+    
+};
+
+exports.updateOneCategory = (req, res) => {
     const id = req.query.id;
 
-  User.destroy({
+Category.update(req.body, {
     where: { id: id }
   })
     .then(num => {
       if (num == 1) {
         res.send({
-          message: "user was deleted successfully!"
+          message: "Category was updated successfully."
         });
       } else {
         res.send({
-          message: `Cannot delete user with id=${id}. Maybe user was not found!`
+          message: `Cannot update Category with id=${id}. Maybe Category was not found or req.body is empty!`
         });
       }
     })
     .catch(err => {
       res.status(500).send({
-        message: "Could not delete user with id=" + id
+        message: "Error updating Category with id=" + id
+      });
+    });
+};
+
+
+exports.deleteOneCategory = (req, res) => {
+    const id = req.query.id;
+
+Category.destroy({
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Category was deleted successfully!"
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Category with id=${id}. Maybe Category was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete Category with id=" + id
       });
     });
 };
@@ -133,7 +131,7 @@ for(const key in condition) {
 }
 
 
-    User.findAndCountAll({ 
+Category.findAndCountAll({ 
       where: obj , limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
