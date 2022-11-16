@@ -1,6 +1,7 @@
 const db = require("../../models");
 const { cart: Cart, user: User, cartItems: CartItems, product: Product } = db;
 const { idExists, userIdExists, userExists, ifExists } = require("../../validators/checker");
+const { getCartProduct } = require("../../lib/dbhelp");
 const Op = db.Sequelize.Op;
 
 
@@ -39,37 +40,20 @@ exports.findAllCarts = (req, res) => {
 
 };
 
-exports.findOneCart = (req, res) => {
-  const id = req.cartId
+exports.findOneCart = async (req, res) => {
+  
+  let id = (!req.query.id)? req.cartId : req.query.id
+  let result = await getCartProduct(id,User,Cart,CartItems,Product);
 
-  Cart.findByPk(id)
-    .then(async data => {
-      //const value = [] 
-      if(data){
-        let result = await ifExists(User, { id: data.userId });
-        let result2 = await ifExists(CartItems, { cartId: data.id });
-       return res.status(200).send(
-        
-        {
-          user:result.rows[0],
-          chartItems:{
-            product1:ifExists(Product, { id: result2.rows[0].productId })
-        }
-        }
-        );
-
-      }
-      if(!data){
-        return res.status(500).send({message:"Error retrieving Cart with id=" + id});
-      }
-      
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving Cart."
-      });
-    });
+  if(result.message){
+   return res.status(400).send(result);
+  }
+  else if(result){
+    return res.status(200).send(result);
+  }
+  else{
+    return res.status(500).send({message:"Error retrieving Cart with id=" + req.cartId});
+  }
 
 };
 

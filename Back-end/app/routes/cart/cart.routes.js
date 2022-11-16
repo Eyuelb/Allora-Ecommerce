@@ -15,7 +15,7 @@ module.exports = function(app) {
 
   app.get("/api/cart/get",[authJwt.verifyToken], [cart_controller.add,cart_controller.findOneCart]);
 
-  app.post("/api/cart/add",[authJwt.verifyToken, access.isAdmin], [cartItems_controller.add]);
+  
 
   app.delete("/api/cart/delete",[authJwt.verifyToken, access.isAdmin], cart_controller.deleteOneCart);
 

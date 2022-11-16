@@ -29,7 +29,7 @@ exports.findAllCartItems = (req, res) => {
   CartItems.findAndCountAll({ limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      res.status(400).send(response);
     })
     .catch(err => {
       res.status(500).send({
@@ -98,11 +98,11 @@ exports.add = async (req, res, next) => {
           })
             .then(num => {
               if (num == 1) {
-                res.send({
+                res.status(200).send({
                   message: newQuantity
                 });
               } else {
-                res.send({
+                res.status(400).send({
                   message: `Cannot update CartItems with id=${result2.rows[0].id}. Maybe CartItems was not found!`
                 });
               }
@@ -153,58 +153,193 @@ exports.add = async (req, res, next) => {
 
 };
 
-exports.updateOneCartItems = (req, res) => {
-  const id = req.query.id;
+exports.deleteOneCartItemProductQuantity = async (req, res) => {
+  const productId = req.body.productId || req.query.productId
 
-  CartItems.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "CartItems was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update CartItems with id=${id}. Maybe CartItems was not found or req.body is empty!`
-        });
+  if (productId) {
+  let result = await idExists(Product, productId);
+  if (result.count) {
+
+      let result2 = await ifExists(CartItems, { productId: productId });
+      if (result2.count) {
+        const newQuantity = parseInt(result2.rows[0].quantity) - 1;
+
+        if (newQuantity == 0) {
+          CartItems.destroy({
+            where: { id: result2.rows[0].id }
+          })
+            .then(num => {
+              if (num == 1) {
+                res.status(200).send({
+                  message: "CartItems was deleted successfully!"
+                });
+              } else {
+                res.status(400).send({
+                  message: `Cannot delete CartItems with id=${result2.rows[0].id}. Maybe CartItems was not found!`
+                });
+              }
+            })
+            .catch(err => {
+              res.status(500).send({
+                message:
+                  err.message || "Could not delete CartItems with id=" + result2.rows[0].id
+              });
+            });
+        }
+        else {
+          req.body.quantity = newQuantity;
+          CartItems.update(req.body, {
+            where: {
+              id: result2.rows[0].id
+            }
+          })
+            .then(num => {
+              if (num == 1) {
+                res.status(200).send({
+                  message: newQuantity
+                });
+              } else {
+                res.status(400).send({
+                  message: `Cannot update CartItems with id=${result2.rows[0].id}. Maybe CartItems was not found!`
+                });
+              }
+            })
+            .catch(err => {
+              res.status(500).send({
+                message:
+                  err.message || "Some error occurred while retrieving CartItems."
+              });
+            });
+
+        }
+
+
+        //   return res.status(200).send({message:result2});
       }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving CartItems."
-      });
-    });
+      else {
+        return res.status(400).send({ message: "ProductID=" + productId + " doesn't exist in CartItems" });
+      }
+
+  }
+  else {
+    return res.status(500).send({ message: "ProductID=" + productId + " doesn't exist" });
+  }
+  }
+  else
+  {
+    return res.status(400).send({ message: "Invalid request" });
+  }
+
+};
+exports.AddOneCartItemProductQuantity = async (req, res) => {
+  const productId = req.body.productId || req.query.productId
+
+  if (productId) {
+  let result = await idExists(Product, productId);
+  if (result.count) {
+
+      let result2 = await ifExists(CartItems, { productId: productId });
+      if (result2.count) {
+        const newQuantity = parseInt(result2.rows[0].quantity) + 1;
+
+        if (result.rows[0].productMaximumQuantityAllowed < newQuantity) {
+          return res.status(400).send({ message: "Product allowed quantity per sell is Maximum=" + result.rows[0].productMaximumQuantityAllowed + ". Please adjust ur quantity" });
+        }
+        else {
+          req.body.quantity = newQuantity;
+          CartItems.update(req.body, {
+            where: {
+              id: result2.rows[0].id
+            }
+          })
+            .then(num => {
+              if (num == 1) {
+                res.status(200).send({
+                  message: newQuantity
+                });
+              } else {
+                res.status(400).send({
+                  message: `Cannot update CartItems with id=${result2.rows[0].id}. Maybe CartItems was not found!`
+                });
+              }
+            })
+            .catch(err => {
+              res.status(500).send({
+                message:
+                  err.message || "Some error occurred while retrieving CartItems."
+              });
+            });
+
+        }
+
+
+        //   return res.status(200).send({message:result2});
+      }
+      else {
+        return res.status(400).send({ message: "ProductID=" + productId + " doesn't exist in CartItems" });
+      }
+
+  }
+  else {
+    return res.status(500).send({ message: "ProductID=" + productId + " doesn't exist" });
+  }
+  }
+  else
+  {
+    return res.status(400).send({ message: "Invalid request" });
+  }
+
 };
 
-
-exports.deleteOneCartItems = (req, res) => {
-  const id = req.query.id;
+exports.deleteOneCartItem = (req, res) => {
+  const cartItemId = req.body.cartItemId || req.query.cartItemId 
 
   CartItems.destroy({
-    where: { id: id }
+    where: { id: cartItemId }
   })
     .then(num => {
       if (num == 1) {
-        res.send({
+        res.status(200).send({
           message: "CartItems was deleted successfully!"
         });
       } else {
-        res.send({
-          message: `Cannot delete CartItems with id=${id}. Maybe CartItems was not found!`
+        res.status(400).send({
+          message: `Cannot delete CartItems with id=${cartItemId}. Maybe CartItems was not found!`
         });
       }
     })
     .catch(err => {
       res.status(500).send({
         message:
-          err.message || "Could not delete CartItems with id=" + id
+          err.message || "Could not delete CartItems with id=" + cartItemId
       });
     });
 };
 
+exports.deleteAllCartItem = (req, res) => {
+  const cartId = req.body.cartId || req.query.cartId || req.cartId
 
+  CartItems.destroy({
+    where: { cartId: cartId }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.status(200).send({
+          message: "CartItems was deleted successfully!"
+        });
+      } else {
+        res.status(400).send({
+          message: `Cannot delete CartItems with id=${cartId}. Maybe CartItems was not found!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Could not delete CartItems with id=" + cartId
+      });
+    });
+};
 
 exports.search = (req, res) => {
   const { page, size } = req.query;
@@ -220,7 +355,7 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        res.status(200).send(response);
       })
       .catch(err => {
         res.status(500).send({
@@ -242,7 +377,7 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        res.status(200).send(response);
       })
       .catch(err => {
         res.status(500).send({
@@ -261,7 +396,7 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        res.status(200).send(response);
       })
       .catch(err => {
         res.status(500).send({
