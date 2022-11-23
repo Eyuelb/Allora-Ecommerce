@@ -6,10 +6,12 @@ const helmet = require ('helmet');
 
 const app = express();
 
+// var corsOptions = {
+//   origin: "http://localhost:5173"
+// };
 var corsOptions = {
-  origin: "http://localhost:5173"
+  origin: "http://localhost:3000"
 };
-
 app.use (helmet ());
 app.use(cors(corsOptions));
 app.use (xss ());
@@ -24,12 +26,12 @@ const Role = db.role;
 const OrderStatus = db.orderStatus;
 const CardType = db.cardType;
 
-// db.sequelize.sync();
-// force: true will drop the table if it already exists
+//db.sequelize.sync();
+//force: true will drop the table if it already exists
 // db.sequelize.sync({force:false}).then(() => {
 //   console.log('Drop and Resync Database with { force: true }');
 //   initial();
-// });
+// }); 
 
 // simple route
 app.get("/", (req, res) => {
@@ -46,6 +48,7 @@ require('./app/routes/product/brand.routes')(app);
 require('./app/routes/product/category.routes')(app);
 require('./app/routes/product/manufacturingCountry.routes')(app);
 
+require('./app/routes/discount/discount.routes')(app);
 
 require('./app/routes/order/order.routes')(app);
 require('./app/routes/payment/payment.routes')(app);

@@ -1,5 +1,5 @@
-const { authJwt , access } = require("../../middleware");
-const { brand_controller} = require("../../controllers");
+const { authJwt , access,order } = require("../../middleware");
+const { order_controller,orderItems_controller,cart_controller} = require("../../controllers");
 module.exports = function(app) {
   app.use(function(req, res, next) {
     res.header(
@@ -11,16 +11,20 @@ module.exports = function(app) {
 
   
 
-  app.get("/api/order/get/all",[authJwt.verifyToken], brand_controller.findAllBrands);
+  app.get("/api/order/get/all",[authJwt.verifyToken,access.isAdmin], order_controller.findAllOrders);
 
-  app.get("/api/order/get",[authJwt.verifyToken], brand_controller.findOneBrand);
+  app.get("/api/order/get",[authJwt.verifyToken,access.isAdmin], order_controller.findOneOrder);
 
-  app.post("/api/order/add",[authJwt.verifyToken, access.isAdmin], brand_controller.add);
+  app.get("/api/order/get/orderedProduct",[authJwt.verifyToken,access.isAdmin], order_controller.findOneOrderedProduct);
 
-  app.put("/api/order/update",[authJwt.verifyToken, access.isAdmin], brand_controller.updateOneBrand);
+ // app.post("/api/order/add",[authJwt.verifyToken], [cart_controller.add,order_controller.add]);
+ app.post("/api/order/add",[authJwt.verifyToken,order.generateOrderId], [cart_controller.add,order_controller.add]);
+  app.put("/api/order/update",[authJwt.verifyToken, access.isAdmin], order_controller.updateOneOrder);
 
-  app.delete("/api/order/delete",[authJwt.verifyToken, access.isAdmin], brand_controller.deleteOneBrand);
+  app.put("/api/order/update/status",[authJwt.verifyToken, access.isAdmin], order_controller.updateStatus);
 
-  app.get("/api/order/search",[authJwt.verifyToken], brand_controller.search);
+  app.delete("/api/order/delete",[authJwt.verifyToken, access.isAdmin], order_controller.deleteOneOrder);
+
+  app.get("/api/order/search",[authJwt.verifyToken,access.isAdmin], order_controller.search);
 
 };

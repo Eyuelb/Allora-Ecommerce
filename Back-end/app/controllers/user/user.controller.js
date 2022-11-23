@@ -23,7 +23,7 @@ exports.moderatorBoard = (req, res) => {
 
 
 const getPagination = (page, size) => {
-    const limit = size ? +size : 3;
+    const limit = size ? +size : 30;
     const offset = page ? page * limit : 0;
   
     return { limit, offset };
@@ -46,10 +46,10 @@ exports.findAllUsers = (req, res) => {
     User.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving users."
         });
@@ -65,7 +65,7 @@ exports.findOneUser = (req, res) => {
       res.send(data);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Error retrieving User with id=" + id
       });
     });
@@ -89,7 +89,7 @@ exports.updateOneUser = (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Error updating User with id=" + id
       });
     });
@@ -114,7 +114,7 @@ exports.deleteOneUser = (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Could not delete user with id=" + id
       });
     });
@@ -137,10 +137,10 @@ for(const key in condition) {
       where: obj , limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving tutorials."
         });

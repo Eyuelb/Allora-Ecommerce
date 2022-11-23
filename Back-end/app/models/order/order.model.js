@@ -1,8 +1,16 @@
 module.exports = (sequelize, Sequelize) => {
   const Order = sequelize.define("orders", {
+    orderId: {
+      type: Sequelize.STRING,
+     // allowNull: false
+    },
+    orderedProducts: {
+      type: Sequelize.JSON,
+     // allowNull: false
+    },
     status: {
       type: Sequelize.STRING,
-      //allowNull: false
+      defaultValue: 'pending',
     },
     stripeChargeId: {
       type: Sequelize.STRING,
@@ -12,15 +20,16 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
      // allowNull: false
     },
-    createdby: {
-        type: Sequelize.STRING,
-       // allowNull: false
-    },
-    updatedby: {
-        type: Sequelize.STRING,
+    handledBy: {
+        type: Sequelize.INTEGER,
         // allowNull defaults to true
     },
+    viewed: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
   });
-
+ 
   return Order;
 };
+ 

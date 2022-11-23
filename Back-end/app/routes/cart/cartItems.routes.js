@@ -25,6 +25,6 @@ module.exports = function(app) {
 
   app.delete("/api/cartItems/deleteAll",[authJwt.verifyToken, access.isAdmin], cartItems_controller.deleteAllCartItem);
 
-  app.get("/api/cartItems/search",[authJwt.verifyToken], cartItems_controller.search);
+  app.get("/api/cartItems/search",[authJwt.verifyToken], cartItems_controller.search);  
 
 };

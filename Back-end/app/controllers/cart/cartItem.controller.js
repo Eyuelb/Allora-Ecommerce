@@ -1,12 +1,12 @@
 const { where } = require("sequelize");
 const db = require("../../models");
 const { cart: Cart, user: User, cartItems: CartItems, product: Product } = db;
-const { idExists, userIdExists, userExists, ifExists } = require("../../validators/checker");
+const { idExists, ifIdExistsFind, userExists, ifExists } = require("../../validators/checker");
 const Op = db.Sequelize.Op;
 
 
 const getPagination = (page, size) => {
-  const limit = size ? +size : 3;
+  const limit = size ? +size : 30;
   const offset = page ? page * limit : 0;
 
   return { limit, offset };
@@ -32,7 +32,7 @@ exports.findAllCartItems = (req, res) => {
       res.status(400).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving CartItems."
       });
@@ -54,7 +54,7 @@ exports.findOneCartItems = (req, res) => {
 
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving CartItems."
       });
@@ -66,8 +66,12 @@ exports.findOneCartItems = (req, res) => {
 exports.add = async (req, res, next) => {
 
   const { productId, quantity } = req.body
+  let result2 = await ifIdExistsFind(CartItems, { productId: productId });
+if(result2.count === 0){
+
+
   let result = await idExists(Product, productId);
-  if (result.count) {
+  if (result.count !== 0) {
     if (result.rows[0].productQuantity == 0) {
       return res.status(400).send({ message: "Product is out of stock" });
     }
@@ -78,48 +82,7 @@ exports.add = async (req, res, next) => {
       return res.status(400).send({ message: "Product allowed quantity per sell is Minimum=" + result.rows[0].productMinimumQuantityAllowed + ". Please adjust ur quantity" });
     }
     else {
-
-      let result2 = await ifExists(CartItems, { productId: productId });
-      if (result2.count) {
-        const newQuantity = parseInt(result2.rows[0].quantity) + parseInt(quantity);
-
-        if (result.rows[0].productMaximumQuantityAllowed < newQuantity) {
-          return res.status(400).send({ message: "you have reached the maximum quantity available for this item" });
-        }
-        else if (result.rows[0].productMinimumQuantityAllowed > newQuantity) {
-          return res.status(400).send({ message: "Product allowed quantity per sell is Minimum=" + result.rows[0].productMinimumQuantityAllowed + ". Please adjust ur quantity" });
-        }
-        else {
-          req.body.quantity = newQuantity;
-          CartItems.update(req.body, {
-            where: {
-              id: result2.rows[0].id
-            }
-          })
-            .then(num => {
-              if (num == 1) {
-                res.status(200).send({
-                  message: newQuantity
-                });
-              } else {
-                res.status(400).send({
-                  message: `Cannot update CartItems with id=${result2.rows[0].id}. Maybe CartItems was not found!`
-                });
-              }
-            })
-            .catch(err => {
-              res.status(500).send({
-                message:
-                  err.message || "Some error occurred while retrieving CartItems."
-              });
-            });
-
-        }
-
-
-        //   return res.status(200).send({message:result2});
-      }
-      else {
+      
         CartItems.create({
           cartId: req.cartId,
           productId: productId,
@@ -131,15 +94,15 @@ exports.add = async (req, res, next) => {
           }
 
           if (cartItems) {
-            res.status(200).send({ message: cartItems });
+            res.status(200).send(cartItems);
           }
         }).catch(err => {
-          res.status(500).send({
+          return res.status(500).send({
             message:
               err.message || "Some error occurred while retrieving CartItems."
           });
         });
-      }
+      
 
 
     }
@@ -149,6 +112,16 @@ exports.add = async (req, res, next) => {
   else {
     return res.status(500).send({ message: "ProductID=" + productId + " doesn't exist" });
   }
+
+
+}
+else if(result2.count !== 0){
+  return res.status(400).send({ message: "ProductID=" + productId + " already exist" });
+}
+else{
+  return res.status(500).send({ message: "ProductID=" + productId + " doesn't exist" });
+}
+
 
 
 };
@@ -180,7 +153,7 @@ exports.deleteOneCartItemProductQuantity = async (req, res) => {
               }
             })
             .catch(err => {
-              res.status(500).send({
+              return res.status(500).send({
                 message:
                   err.message || "Could not delete CartItems with id=" + result2.rows[0].id
               });
@@ -205,7 +178,7 @@ exports.deleteOneCartItemProductQuantity = async (req, res) => {
               }
             })
             .catch(err => {
-              res.status(500).send({
+              return res.status(500).send({
                 message:
                   err.message || "Some error occurred while retrieving CartItems."
               });
@@ -264,7 +237,7 @@ exports.AddOneCartItemProductQuantity = async (req, res) => {
               }
             })
             .catch(err => {
-              res.status(500).send({
+              return res.status(500).send({
                 message:
                   err.message || "Some error occurred while retrieving CartItems."
               });
@@ -309,7 +282,7 @@ exports.deleteOneCartItem = (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Could not delete CartItems with id=" + cartItemId
       });
@@ -334,7 +307,7 @@ exports.deleteAllCartItem = (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Could not delete CartItems with id=" + cartId
       });
@@ -355,10 +328,10 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.status(200).send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving CartItems."
         });
@@ -377,10 +350,10 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.status(200).send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving CartItems."
         });
@@ -396,10 +369,10 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.status(200).send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving CartItems."
         });
@@ -417,10 +390,10 @@ exports.search = (req, res) => {
     })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving CartItems."
         });

@@ -40,7 +40,7 @@ const ifExists = async (db,obj) => {
   
   //  validateId(id);
 const result = await db.findAndCountAll({ where: obj})
-return (result.count)? result: httpError(400, "Some error occurred while retrieving this"+result);
+return (result.count)? result : result.message=httpError(400, "Some error occurred while retrieving this"+result);
 
 }
 
@@ -52,11 +52,34 @@ const result = await db.findByPk(id)
 return result !== null? result: httpError(400, "Some error occurred while retrieving id="+id);
 
 }
+
+
+const  ifIdExistsFind = async (db,obj) => {
+
+  //  validateUserId(userId);
+  return await db.findAndCountAll({ 
+        where: obj})
+        .then(data => {
+          if(data){
+            return data;
+          }
+        })
+}
+
+const add = async (db,obj) => {
+  
+  //  validateId(id);
+const result = await db.create(obj)
+return (result)? result: httpError(400, "Some error occurred while retrieving this"+result);
+
+}
 // exporting all the functions
 module.exports = {
     ifExists,
     idExists,
     userIdExists,
     userExists,
-    findById
+    findById,
+    ifIdExistsFind,
+    add
 }

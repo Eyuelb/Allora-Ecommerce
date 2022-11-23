@@ -4,7 +4,7 @@ const { category:Category} = db;
 const Op = db.Sequelize.Op;
 
 const getPagination = (page, size) => {
-    const limit = size ? +size : 3;
+    const limit = size ? +size : 30;
     const offset = page ? page * limit : 0;
   
     return { limit, offset };
@@ -27,10 +27,10 @@ exports.findAllCategorys = (req, res) => {
     Category.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving Categorys."
         });
@@ -46,7 +46,7 @@ exports.findOneCategory = (req, res) => {
       res.send(data);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Error retrieving Category with id=" + id
       });
     });
@@ -61,10 +61,10 @@ exports.add = (req, res) => {
         }
 
         if(category){
-            res.status(200).send({ message: category });
+            res.status(200).send(category);
         }
         }).catch(err => {
-          res.status(500).send({ message: err.message });
+          return res.status(500).send({ message: err.message });
         });
     
 };
@@ -87,7 +87,7 @@ Category.update(req.body, {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Error updating Category with id=" + id
       });
     });
@@ -112,7 +112,7 @@ Category.destroy({
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Could not delete Category with id=" + id
       });
     });
@@ -135,10 +135,10 @@ Category.findAndCountAll({
       where: obj , limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving tutorials."
         });

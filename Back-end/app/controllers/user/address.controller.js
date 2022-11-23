@@ -9,7 +9,7 @@ const { validateID,
 
 
 const getPagination = (page, size) => {
-    const limit = size ? +size : 3;
+    const limit = size ? +size : 30;
     const offset = page ? page * limit : 0;
   
     return { limit, offset };
@@ -32,10 +32,10 @@ exports.findAllAddresss = (req, res) => {
     Address.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving Addresss."
         });
@@ -57,7 +57,7 @@ exports.findOneAddress = (req, res) => {
       
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Address."
       });
@@ -79,7 +79,7 @@ exports.add = (req, res, next) => {
         res.status(200).send({ message: address });
     }
     }).catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Address."
       });
@@ -104,7 +104,7 @@ Address.update(req.body, {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Address."
       });
@@ -130,7 +130,7 @@ Address.destroy({
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Could not delete Address with id=" + id
       });
@@ -151,10 +151,10 @@ if(req.body.userId){
       userId:req.body.userId}, limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      return res.status(200).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Address."
       });
@@ -171,10 +171,10 @@ if(!req.body.userId){
     where: obj , limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      return res.status(200).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Address."
       });

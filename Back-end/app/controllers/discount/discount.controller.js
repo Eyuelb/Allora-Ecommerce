@@ -1,5 +1,5 @@
 const db = require("../../models");
-const { manufacturingCountry:ManufacturingCountry} = db;
+const { discount:Discount} = db;
 
 const Op = db.Sequelize.Op;
 
@@ -11,20 +11,20 @@ const getPagination = (page, size) => {
   };
   
   const getPagingData = (data, page, limit) => {
-    const { count: totalItems, rows: manufacturingCountrys } = data;
+    const { count: totalItems, rows: discounts } = data;
     const currentPage = page ? +page : 0;
     const totalPages = Math.ceil(totalItems / limit);
 
   
-    return { totalItems, totalPages, currentPage , manufacturingCountrys};
+    return { totalItems, totalPages, currentPage , discounts};
   };
 
 
-exports.findAllManufacturingCountrys = (req, res) => {
+exports.findAllDiscounts = (req, res) => {
     const { page, size } = req.query;
     const { limit, offset } = getPagination(page, size);
   
-    ManufacturingCountry.findAndCountAll({ limit, offset })
+    Discount.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
         return res.status(200).send(response);
@@ -32,36 +32,36 @@ exports.findAllManufacturingCountrys = (req, res) => {
       .catch(err => {
         return res.status(500).send({
           message:
-            err.message || "Some error occurred while retrieving ManufacturingCountrys."
+            err.message || "Some error occurred while retrieving Discounts."
         });
       });
 
 };
 
-exports.findOneManufacturingCountry = (req, res) => {
+exports.findOneDiscount = (req, res) => {
   const id = req.query.id
 
-  ManufacturingCountry.findByPk(id)
+  Discount.findByPk(id)
     .then(data => {
-      res.send(data);
+      return res.status(200).res.send(data);
     })
     .catch(err => {
       return res.status(500).send({
-        message: "Error retrieving ManufacturingCountry with id=" + id
+        message: "Error retrieving Discount with id=" + id
       });
     });
 };
 
 
 exports.add = (req, res) => {
-    ManufacturingCountry.create(req.body).then(manufacturingCountry => {
+    Discount.create(req.body).then(discount => {
          
-        if(!manufacturingCountry){
-            res.status(400).send({ message: "Error while saving manufacturingCountrys" });
+        if(!discount){
+          return res.status(400).send({ message: "Error while saving discounts" });
         }
 
-        if(manufacturingCountry){
-            res.status(200).send(manufacturingCountry);
+        if(discount){
+          return res.status(200).send(discount);
         }
         }).catch(err => {
           return res.status(500).send({ message: err.message });
@@ -69,51 +69,51 @@ exports.add = (req, res) => {
     
 };
 
-exports.updateOneManufacturingCountry = (req, res) => {
+exports.updateOneDiscount = (req, res) => {
     const id = req.query.id;
 
-ManufacturingCountry.update(req.body, {
+Discount.update(req.body, {
     where: { id: id }
   })
     .then(num => {
       if (num == 1) {
-        res.send({
-          message: "ManufacturingCountry was updated successfully."
+        return res.status(200).send({
+          message: "Discount was updated successfully."
         });
       } else {
-        res.send({
-          message: `Cannot update ManufacturingCountry with id=${id}. Maybe ManufacturingCountry was not found or req.body is empty!`
+        return res.status(400).res.send({
+          message: `Cannot update Discount with id=${id}. Maybe Discount was not found or req.body is empty!`
         });
       }
     })
     .catch(err => {
       return res.status(500).send({
-        message: "Error updating ManufacturingCountry with id=" + id
+        message: "Error updating Discount with id=" + id
       });
     });
 };
 
 
-exports.deleteOneManufacturingCountry = (req, res) => {
+exports.deleteOneDiscount = (req, res) => {
     const id = req.query.id;
 
-ManufacturingCountry.destroy({
+Discount.destroy({
     where: { id: id }
   })
     .then(num => {
       if (num == 1) {
-        res.send({
-          message: "ManufacturingCountry was deleted successfully!"
+        return res.status(200).res.send({
+          message: "Discount was deleted successfully!"
         });
       } else {
-        res.send({
-          message: `Cannot delete ManufacturingCountry with id=${id}. Maybe ManufacturingCountry was not found!`
+        return res.status(400).res.send({
+          message: `Cannot delete Discount with id=${id}. Maybe Discount was not found!`
         });
       }
     })
     .catch(err => {
       return res.status(500).send({
-        message: "Could not delete ManufacturingCountry with id=" + id
+        message: "Could not delete Discount with id=" + id
       });
     });
 };
@@ -131,7 +131,7 @@ for(const key in condition) {
 }
 
 
-ManufacturingCountry.findAndCountAll({ 
+Discount.findAndCountAll({ 
       where: obj , limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);

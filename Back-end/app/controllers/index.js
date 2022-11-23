@@ -12,9 +12,13 @@ const category_controller = require("./product/category.controller");
 const manufacturingCountry_controller = require("./product/manufacturingCountry.controller");
 
 const payment_controller = require("./order/payment.controller");
+const order_controller = require("./order/order.controller");
+const orderItems_controller = require("./order/orderItem.controller");
 
 const cart_controller = require("./cart/cart.controller");
 const cartItems_controller = require("./cart/cartItem.controller");
+
+const discount_controller = require("./discount/discount.controller");
 module.exports = {
   auth_controller,
   user_controller,
@@ -28,5 +32,8 @@ module.exports = {
   address_controller,
   payment_controller,
   cart_controller,
-  cartItems_controller
+  cartItems_controller,
+  order_controller,
+  orderItems_controller,
+  discount_controller
 };

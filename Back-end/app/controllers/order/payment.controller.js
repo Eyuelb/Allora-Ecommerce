@@ -5,7 +5,7 @@ const Op = db.Sequelize.Op;
 
 
 const getPagination = (page, size) => {
-    const limit = size ? +size : 3;
+    const limit = size ? +size : 30;
     const offset = page ? page * limit : 0;
   
     return { limit, offset };
@@ -28,10 +28,10 @@ exports.findAllCards = (req, res) => {
     Card.findAndCountAll({ limit, offset })
       .then(data => {
         const response = getPagingData(data, page, limit);
-        res.send(response);
+        return res.status(200).send(response);
       })
       .catch(err => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while retrieving Cards."
         });
@@ -75,7 +75,7 @@ exports.add = (req, res, next) => {
         res.status(200).send({ message: card });
     }
     }).catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Card."
       });
@@ -100,7 +100,7 @@ Card.update(req.body, {
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Card."
       });
@@ -126,7 +126,7 @@ Card.destroy({
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Could not delete Card with id=" + id
       });
@@ -147,10 +147,10 @@ if(req.body.userId){
       userId:req.body.userId}, limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      return res.status(200).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Card."
       });
@@ -168,10 +168,10 @@ if(!req.body.userId){
     where: obj , limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      return res.status(200).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Card."
       });
@@ -185,10 +185,10 @@ if(req.body.id){
       id:req.body.id}, limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      return res.status(200).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Card."
       });
@@ -205,10 +205,10 @@ if(!req.body.id){
     where: obj , limit, offset })
     .then(data => {
       const response = getPagingData(data, page, limit);
-      res.send(response);
+      return res.status(200).send(response);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message:
           err.message || "Some error occurred while retrieving Card."
       });

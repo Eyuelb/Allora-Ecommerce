@@ -32,7 +32,6 @@ db.cartItems = require("./cart/cartItems.model")(sequelize, Sequelize);
 
 
 db.order = require("./order/order.model")(sequelize, Sequelize);
-db.orderItems = require("./order/orderItems.model")(sequelize, Sequelize);
 db.orderStatus = require("./order/orderStatus.model")(sequelize, Sequelize);
 
 
@@ -48,6 +47,7 @@ db.manufacturingCountry = require("./product/manufacturingCountry.model")(sequel
 
 db.session = require("./session/session.model")(sequelize, Sequelize);
 
+db.discount = require("./discount/discount.model")(sequelize, Sequelize);
 
 db.user = require("./user/user.model.js")(sequelize, Sequelize);
 db.role = require("./user/role.model.js")(sequelize, Sequelize);
@@ -101,13 +101,12 @@ db.order.belongsTo(db.address, {
 db.order.belongsTo(db.card, {
   foreignKey: 'paymentId', targetKey: 'id'
 });
-db.orderItems.belongsTo(db.order, {
-  foreignKey: 'orderId', targetKey: 'id'
-});
-db.orderItems.belongsTo(db.product, {
-  foreignKey: 'productId', targetKey: 'id'
-});
 
+
+
+db.order.belongsTo(db.discount, {
+  foreignKey: 'discountId', targetKey: 'id'
+});
 
 
 

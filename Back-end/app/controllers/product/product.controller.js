@@ -4,7 +4,7 @@ const { product:Product} = db;
 const Op = db.Sequelize.Op;
 
 const getPagination = (page, size) => {
-    const limit = size ? +size : 3;
+    const limit = size ? +size : 30;
     const offset = page ? page * limit : 0;
   
     return { limit, offset };
@@ -21,23 +21,48 @@ const getPagination = (page, size) => {
 
 
 exports.findAllProducts = (req, res) => {
-    const { page, size } = req.query;
-    const { limit, offset } = getPagination(page, size);
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  let condition = req.query || req.body
+  let id = (req.body.id)?req.body.id:(req.query.id)?req.query.id:null;
+  let obj = {}
   
-    Product.findAndCountAll({ limit, offset })
-      .then(data => {
-        const response = getPagingData(data, page, limit);
-        res.send(response);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving Products."
-        });
-      });
+if (id !== null){
+  Product.findAndCountAll({ 
+  where:  {
+    id:id}, limit, offset })
+  .then(data => {
+    const response = getPagingData(data, page, limit);
+    return res.status(200).send(response);
+  })
+  .catch(err => {
+    return res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving Cart."
+    });
+  });
+}
+else{
+for(const key in condition) {
+
+  obj[`${key}`] = { [Op.like]: `%${condition[key]}%` };
+}
+
+Product.findAndCountAll({ 
+  where: obj , limit, offset })
+  .then(data => {
+    const response = getPagingData(data, page, limit);
+    return res.status(200).send(response);
+  })
+  .catch(err => {
+    return res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving Cart."
+    });
+  });
 
 };
-
+}
 exports.findOneProduct = (req, res) => {
   const id = req.query.id
 
@@ -46,7 +71,7 @@ exports.findOneProduct = (req, res) => {
       res.send(data);
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Error retrieving Product with id=" + id
       });
     });
@@ -61,10 +86,10 @@ exports.add = (req, res) => {
         }
 
         if(product){
-            res.status(200).send({ message: product });
+            res.status(200).send(product);
         }
         }).catch(err => {
-          res.status(500).send({ message: err.message });
+          return res.status(500).send({ message: err.message });
         });
     
 };
@@ -77,17 +102,17 @@ Product.update(req.body, {
   })
     .then(num => {
       if (num == 1) {
-        res.send({
+        return res.status(200).send({
           message: "Product was updated successfully."
         });
       } else {
-        res.send({
+        return res.status(400).send({
           message: `Cannot update Product with id=${id}. Maybe Product was not found or req.body is empty!`
         });
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Error updating Product with id=" + id
       });
     });
@@ -102,17 +127,17 @@ Product.destroy({
   })
     .then(num => {
       if (num == 1) {
-        res.send({
+        return res.status(200).send({
           message: "Product was deleted successfully!"
         });
       } else {
-        res.send({
+        return res.status(400).send({
           message: `Cannot delete Product with id=${id}. Maybe Product was not found!`
         });
       }
     })
     .catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: "Could not delete Product with id=" + id
       });
     });
@@ -120,28 +145,53 @@ Product.destroy({
 
 
 exports.search = (req, res) => {
-    const { page, size } = req.query;
-    const { limit, offset } = getPagination(page, size);
-    var condition = req.body
-var obj = {}
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  let condition = req.query || req.body
+  let id = (req.body.id)?req.body.id:(req.query.id)?req.query.id:null;
+  let obj = {}
+  
+if (id !== null){
+  Product.findAndCountAll({ 
+  where:  {
+    id:id}, limit, offset })
+  .then(data => {
+    const response = getPagingData(data, page, limit);
+    return res.status(200).send(response);
+  })
+  .catch(err => {
+    return res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving Cart."
+    });
+  });
+}
+else{
 for(const key in condition) {
 
   obj[`${key}`] = { [Op.like]: `%${condition[key]}%` };
-    //console.log(`${key}: ${condition[key]}`);
 }
 
-
 Product.findAndCountAll({ 
-      where: obj , limit, offset })
-      .then(data => {
-        const response = getPagingData(data, page, limit);
-        res.send(response);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving tutorials."
-        });
-      });
-  };
+  where: obj , limit, offset })
+  .then(data => {
+    const response = getPagingData(data, page, limit);
+    return res.status(200).send(response);
+  })
+  .catch(err => {
+    return res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving Cart."
+    });
+  });
 
+};
+
+
+
+
+
+
+
+
+}
